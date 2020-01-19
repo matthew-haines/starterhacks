@@ -9,11 +9,13 @@ from scipy import signal
 import scipy
 import database.database as database
 from flask import Flask, request
+from flask_cors import CORS
 import json
 import time
 from serial import Serial
 
 app = Flask(__name__)
+CORS(app)
 
 SAMPLING_FREQUENCY = 60
 
