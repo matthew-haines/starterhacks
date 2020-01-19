@@ -6,4 +6,5 @@ if __name__ == '__main__':
         print("Bad arguments")
         exit()
     
-    
+    # read file somewhere
+    data
