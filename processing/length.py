@@ -1,6 +1,7 @@
 import numpy as np
+from typing import Tuple
 
-def getstartend(x):
+def getstartend(x: np.ndarray) -> Tuple[int, int]:
     # x is just a vector
     threshold = 0.05
     start = 0

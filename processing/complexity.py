@@ -1,6 +1,6 @@
 import numpy as np
 
-def complexity(x):
+def complexity(x: np.ndarray) -> float:
     if not len(x):
         return 0
         
