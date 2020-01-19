@@ -38,7 +38,7 @@ def uniqueness(sample: Dict, others: List) -> float:
     for othersample in others:
         similarities += similarity(sample['fingerprint'], othersample['fingerprint'])
 
-    return 1 - similarities / max(len(others), 1)
+    return (1 - similarities / max(len(others), 1))*10.0
 
 def printdb(data: List):
     for sample in data:

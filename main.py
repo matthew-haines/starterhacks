@@ -9,13 +9,16 @@ from scipy import signal
 import scipy
 import database.database as database
 from flask import Flask, request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import json
 import time
 from serial import Serial
 
 app = Flask(__name__)
-CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(app, resources={r"/all": {"origins": "http://localhost:3000"}})
+
+ser = Serial('/dev/tty.usbmodem1421', 115200)
 
 SAMPLING_FREQUENCY = 60
 
@@ -39,9 +42,8 @@ def buildfingerprint(data: np.ndarray, hertz: int) -> List:
 
 def process(data: pd.DataFrame) -> Dict:
     # read file somewhere
-    start = getstart(data['x'])
-    length = len(data['x']) - start
-    handshake = data.values[start:]
+    length = len(data['x'])
+    handshake = data.values
     vigval = vigour(handshake)
     compval = complexity(handshake)
 
@@ -66,33 +68,33 @@ def process(data: pd.DataFrame) -> Dict:
     return sample
 
 @app.route('/new')
+@cross_origin()
 def queryNew():
-    ser = Serial('/dev/tty.tty.usbmodem1421', 115200)
     data = []
     tempx = np.zeros((1000))
-    time.sleep(2)
     for i in range(700):
         temp = ser.readline().decode().rstrip()
         x, y, z = temp.split(' ')
-        data.append({'x': x, 'y': y, 'z': z})
-        temp[i] = x
-        if i > 40:
+        data.append({'x': float(x), 'y': float(y), 'z': float(z)})
+        tempx[i] = x
+        if i > 120:
             if np.std(tempx[i-39:i+1]) < 0.05:
                 break
         time.sleep(1/60)
-        
+    
     df = pd.DataFrame(data)
     df = df.drop(0)
-
     return json.dumps(process(df))
 
 @app.route('/dummy')
+@cross_origin()
 def dummyQuery():
     df = pd.read_csv('collection/coolShake.csv')
     df = df.drop(0)
     return json.dumps(process(df))
 
-@app.route('/all')
+@app.route('/all', methods=['GET'])
+@cross_origin(origin='http://localhost:3000',headers=['Content- Type'])
 def queryDB():
     samples = database.load_data()
     for sample in samples:
