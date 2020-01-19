@@ -65,7 +65,7 @@ def process(data: pd.DataFrame) -> Dict:
 
 @app.route('/new')
 def queryNew():
-    ser = Serial(sys.argv[1], sys.argv[2])
+    ser = Serial('/dev/tty.tty.usbmodem1421', 115200)
     data = []
     tempx = np.zeros((1000))
     time.sleep(2)
@@ -87,7 +87,7 @@ def queryNew():
 @app.route('/dummy')
 def dummyQuery():
     df = pd.read_csv('collection/coolShake.csv')
-    df = df.drop()
+    df = df.drop(0)
     return json.dumps(process(df))
 
 @app.route('/all')
