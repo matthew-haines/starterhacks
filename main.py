@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from processing.length import getstartend
+from processing.length import getstart
 from processing.vigour import vigour
 from processing.complexity import complexity
 import pandas as pd
@@ -11,6 +11,7 @@ import database.database as database
 from flask import Flask, request
 import json
 import time
+from serial import Serial
 
 app = Flask(__name__)
 
@@ -34,13 +35,11 @@ def buildfingerprint(data: np.ndarray, hertz: int) -> List:
     out.sort()
     return out
 
-def process(inputfile: str) -> Dict:
+def process(data: pd.DataFrame) -> Dict:
     # read file somewhere
-    data = pd.read_csv(inputfile)
-    data = data.drop(0)
-    start, end = getstartend(data['x'])
-    length = end - start
-    handshake = data.values[start:end]
+    start = getstart(data['x'])
+    length = len(data['x']) - start
+    handshake = data.values[start:]
     vigval = vigour(handshake)
     compval = complexity(handshake)
 
@@ -65,8 +64,39 @@ def process(inputfile: str) -> Dict:
     return sample
 
 @app.route('/new')
-def query():
-    return json.dumps(process('collection/hand1.csv'))
+def queryNew():
+    ser = Serial(sys.argv[1], sys.argv[2])
+    data = []
+    tempx = np.zeros((1000))
+    time.sleep(2)
+    for i in range(700):
+        temp = ser.readline().decode().rstrip()
+        x, y, z = temp.split(' ')
+        data.append({'x': x, 'y': y, 'z': z})
+        temp[i] = x
+        if i > 40:
+            if np.std(tempx[i-39:i+1]) < 0.05:
+                break
+        time.sleep(1/60)
+        
+    df = pd.DataFrame(data)
+    df = df.drop(0)
+
+    return json.dumps(process(df))
+
+@app.route('/dummy')
+def dummyQuery():
+    df = pd.read_csv('collection/coolShake.csv')
+    df = df.drop()
+    return json.dumps(process(df))
+
+@app.route('/all')
+def queryDB():
+    samples = database.load_data()
+    for sample in samples:
+        del sample['raw']
+
+    return json.dumps(samples)
 
 if __name__ == '__main_':
     app.run(debug=True, port=5000) #run app in debug mode on port 5000
