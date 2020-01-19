@@ -7,4 +7,5 @@ def vigour(x):
         total += np.linalg.norm(vec)
 
     mean = total / len(x)
-    return (mean - 1.08) * 10 / 2
+    print(mean)
+    return (mean - 0.85) * 10 / (1.35 - 0.85)
