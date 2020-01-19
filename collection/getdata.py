@@ -12,7 +12,7 @@ if __name__ == '__main__':
     ser = Serial(sys.argv[1], sys.argv[2])
     data = []
     time.sleep(2)
-    for i in range(0,1000):
+    for i in range(0,700):
 
         temp = ser.readline().decode().rstrip()
         x, y, z = temp.split(' ')
