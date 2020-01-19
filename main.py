@@ -71,14 +71,14 @@ def process(data: pd.DataFrame) -> Dict:
 @cross_origin()
 def queryNew():
     data = []
-    tempx = np.zeros((1000))
+    temps = np.zeros((1000))
     for i in range(700):
         temp = ser.readline().decode().rstrip()
         x, y, z = temp.split(' ')
         data.append({'x': float(x), 'y': float(y), 'z': float(z)})
-        tempx[i] = x
+        temps[i] = np.linalg.norm([x, y, z])
         if i > 120:
-            if np.std(tempx[i-39:i+1]) < 0.05:
+            if np.std(temps[i-39:i+1]) < 0.1:
                 break
         time.sleep(1/60)
     
