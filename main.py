@@ -18,8 +18,8 @@ SAMPLING_FREQUENCY = 60
 
 def fft(data: np.ndarray, hertz: int) -> Tuple[np.ndarray, np.ndarray]:
     x = np.linspace(0, len(data)/hertz, len(data), endpoint=False)
-    y = scipy.fftpack.fft(signal.detrend(data))
-    freqs = scipy.fftpack.fftfreq(len(x)) * hertz
+    y = scipy.fft.fft(signal.detrend(data))
+    freqs = scipy.fft.fftfreq(len(x)) * hertz
     length = len(freqs) // 2
     return freqs[:length], np.abs(y[:length])
 
